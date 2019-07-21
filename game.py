@@ -7,8 +7,8 @@ from helpers import is_intersect
 from constants import WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH, PLAYER_COLORS, MAX_TICK_COUNT, BONUS_CHANCE, \
     BONUSES_MAX_COUNT, X_CELLS_COUNT, Y_CELLS_COUNT, SPEED, NEUTRAL_TERRITORY_SCORE, ENEMY_TERRITORY_SCORE, \
     LINE_KILL_SCORE, SAW_KILL_SCORE, AVAILABLE_BONUSES, SAW_SCORE
-from game_objects.player import Player
-from game_objects.bonuses import Nitro, Slowdown, Bonus, Saw
+from player import Player
+from bonuses import Nitro, Slowdown, Bonus, Saw
 
 
 class Game:
@@ -178,12 +178,12 @@ class Game:
     def get_bonuses_states(self):
         return [b.get_state() for b in self.bonuses]
 
-    async def game_loop(self, *args, **kwargs):
+    def game_loop(self, *args, **kwargs):
         self.send_game_tick()
 
         for player in self.players:
             if (player.x - round(WIDTH / 2)) % WIDTH == 0 and (player.y - round(WIDTH / 2)) % WIDTH == 0:
-                command = await player.get_command(self.tick)
+                command = player.get_command(self.tick)
                 if command:
                     player.change_direction(command)
 
@@ -298,59 +298,54 @@ class Game:
 class LocalGame(Game):
     border_color = (144, 163, 174, 255)
 
-    def __init__(self, clients, scene, timeout):
+    def __init__(self, clients):
         super().__init__(clients)
-        self.scene = scene
-        self.timeout = timeout
 
     def show_bonuses(self):
         for player in self.players:
             if len(player.bonuses) > 0:
                 for bonus in player.bonuses:
                     label = '{} - {} - {}'.format(player.name, bonus.name, bonus.get_remaining_ticks())
-                    self.scene.append_label_to_leaderboard(label, player.color)
 
     def show_losers(self):
         for player in self.losers:
             label = '{} выбыл, результат: {}'.format(player.name, player.score)
-            self.scene.append_label_to_leaderboard(label, player.color)
 
     def show_score(self):
         for player in self.players:
             label = '{} результат: {}'.format(player.name, player.score)
-            self.scene.append_label_to_leaderboard(label, player.color)
 
-    def draw_bonuses(self):
-        for bonus in self.bonuses:
-            bonus.draw()
+    # def draw_bonuses(self):
+    #     for bonus in self.bonuses:
+    #         bonus.draw()
 
-    def draw(self):
-        for player in self.players:
-            player.territory.draw()
+    # def draw(self):
+    #     for player in self.players:
+    #         player.territory.draw()
 
-        Saw.draw_lines()
-        Saw.draw_territories()
+    #     Saw.draw_lines()
+    #     Saw.draw_territories()
 
-        for player in self.players:
-            player.draw_lines()
+    #     for player in self.players:
+    #         player.draw_lines()
 
-        for player in self.players:
-            player.draw_position()
+    #     for player in self.players:
+    #         player.draw_position()
 
-        if len(self.players) == 0:
-            self.scene.show_game_over()
-        elif self.timeout and self.tick >= MAX_TICK_COUNT:
-            self.scene.show_game_over(timeout=True)
+    #     if len(self.players) == 0:
+    #         self.scene.show_game_over()
+    #     elif self.timeout and self.tick >= MAX_TICK_COUNT:
+    #         self.scene.show_game_over(timeout=True)
 
-        self.draw_bonuses()
+    #     self.draw_bonuses()
 
-        self.scene.draw_leaderboard()
-        self.show_losers()
-        self.show_score()
-        self.show_bonuses()
-        self.scene.reset_leaderboard()
-
-    async def game_loop(self, *args, **kwargs):
-        self.scene.clear()
-        self.draw()
-        return await super().game_loop(*args, **kwargs)
+    #     self.scene.draw_leaderboard()
+    #     self.show_losers()
+    #     self.show_score()
+    #     self.show_bonuses()
+    #     self.scene.reset_leaderboard()
+    
+    def game_loop(self, *args, **kwargs):
+        # self.scene.clear()
+        # self.draw()
+        return super().game_loop(*args, **kwargs)

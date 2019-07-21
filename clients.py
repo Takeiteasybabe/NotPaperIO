@@ -116,7 +116,7 @@ class SimplePythonClient(Client):
         next_point = self.get_next_point()
         return next_point not in self.lines and not self.is_border(next_point)
 
-    async def get_command(self):
+    def get_command(self):
         if not self.next_change or self.next_change == 0 or not self.is_empty_next_point():
             self.next_change = random.randint(1, 4)
             self.change_command()
